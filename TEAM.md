@@ -4,7 +4,7 @@
 * CEO / Product Owner
 * ML Engineer
 
-**sashadugina06**
+**@sashadugina06**
 * Marketing Manager
 * Designer
 * Frontend Dev
