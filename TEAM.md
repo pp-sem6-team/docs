@@ -12,3 +12,7 @@
 **@kmwk10**
 * CTO / Tech Lead
 * Backend Dev
+
+**@luxeboy**
+* Marketing Manager
+* Frontend Dev (Mobile)
