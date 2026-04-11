@@ -216,7 +216,6 @@ ML-сервис выполняет обработку изображения и 
     Authorization: Bearer access_token
     {
         "email": "user@example.com",        // необязательное
-        "password": "string",               // необязательное
         "name": "John Doe",                 // необязательное
         "birth_date": "2000-01-01",         // необязательное
         "gender": "male" | "female" | null  // необязательное
@@ -233,6 +232,20 @@ ML-сервис выполняет обработку изображения и 
         "created_at": "2026-01-01T12:00:00Z",
         "updated_at": "2026-01-01T12:00:00Z"
     }
+
+
+### PATCH /users/me/password
+Обновление пароля пользователя.
+
+#### Request
+    Authorization: Bearer access_token
+    {
+        "current_password": "string",
+        "new_password": "string"
+    }
+
+#### Response
+    204 No Content
 
 
 ### DELETE /users/me
