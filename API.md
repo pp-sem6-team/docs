@@ -28,12 +28,12 @@ multipart/form-data
 
 API использует стандартные HTTP-коды ответа:
 
-- 200 OK - успешное выполнение запроса  
-- 201 Created - ресурс успешно создан
-- 202 Accepted - запрос принят, но обработка выполняется асинхронно
-- 204 No Content - успешное выполнение запроса без тела ответа  
-- 400 Bad Request - ошибка в параметрах запроса  
-- 401 Unauthorized - пользователь не авторизован  
+- 200 OK - запрос выполнен успешно  
+- 201 Created - ресурс создан  
+- 202 Accepted - запрос принят в обработку  
+- 204 No Content - успешное выполнение без тела ответа  
+- 400 Bad Request - некорректный запрос  
+- 401 Unauthorized - требуется авторизация  
 - 404 Not Found - ресурс не найден  
 - 500 Internal Server Error - внутренняя ошибка сервера
 
@@ -47,7 +47,6 @@ Frontend взаимодействует только с backend API.
 Backend обрабатывает запросы пользователей, управляет данными и при необходимости отправляет изображения в ML-сервис для анализа.  
 ML-сервис выполняет обработку изображения и возвращает результаты анализа бэкенду.
 
-> Эндпоинт POST /internal/ml/analyze предназначен только для внутреннего взаимодействия Backend -> ML
 
 ## Структуры данных
 
@@ -107,16 +106,17 @@ ML-сервис выполняет обработку изображения и 
 
     GET    /users/me
     PATCH  /users/me
+    PATCH  /users/me/password
     DELETE /users/me
 
-    POST   /analysis
-    GET    /analysis
-    GET    /analysis/{id}
-    DELETE /analysis/{id}
-
-    POST   /internal/ml/analyze
+    POST   /analyses
+    GET    /analyses
+    GET    /analyses/{id}
+    DELETE /analyses/{id}
 
     GET    /health
+    GET    /health/db
+    GET    /health/storage
 
 
 ### POST /auth/register
@@ -256,13 +256,10 @@ ML-сервис выполняет обработку изображения и 
     Authorization: Bearer access_token
 
 #### Response
-    200 OK
-    {
-        "message": "user deleted"
-    }
+    204 No Content
 
 
-### POST /analysis
+### POST /analyses
 Загрузка фотографии для анализа кожи.
 
 #### Request
@@ -270,7 +267,7 @@ ML-сервис выполняет обработку изображения и 
 
     multipart/form-data:
 
-    file: image
+    photo: file
 
 #### Response
     202 Accepted
@@ -283,11 +280,14 @@ ML-сервис выполняет обработку изображения и 
     }
 
 
-### GET /analysis
+### GET /analyses
 Получение истории анализов пользователя.
 
 #### Request
     Authorization: Bearer access_token
+    Query:
+        offset (int, default: 0)
+        limit  (int, default: 10, max: 100)
 
 #### Response
     200 OK
@@ -304,11 +304,14 @@ ML-сервис выполняет обработку изображения и 
     ]
 
 
-### GET /analysis/{id}
+### GET /analyses/{id}
 Получение результата конкретного анализа.
 
 #### Request
     Authorization: Bearer access_token
+    Query:
+        recs_limit (int, default: 10)
+        ings_limit (int, default: 10)
 
 #### Response
     200 OK
@@ -318,7 +321,7 @@ ML-сервис выполняет обработку изображения и 
         "file_url": "https://example.com/photos/uuid.jpg",
         "status": "processing" | "completed" | "failed",
         "skin_type": "oily" | "dry" | "normal" | "combination" | null,
-        "analysis_data": { ... },          // содержимое JSONB из таблицы analysis
+        "analysis_data": { ... },          // содержимое JSONB из таблицы analyses
         "recommendations": [               // присутствует только если status = completed
             {
                 "id": "UUID",
@@ -338,35 +341,14 @@ ML-сервис выполняет обработку изображения и 
     }
 
 
-### DELETE /analysis/{id}
+### DELETE /analyses/{id}
 Удаление анализа пользователя.
 
 #### Request
     Authorization: Bearer access_token
 
 #### Response
-    200 OK
-    {
-        "message": "analysis deleted"
-    }
-
-
-### POST /internal/ml/analyze
-Внутренний эндпоинт для ML-сервиса.
-
-#### Request
-    X-Internal-Secret: <SECRET_KEY>
-
-    multipart/form-data
-
-    file: image
-
-#### Response
-    200 OK
-    {
-        "skin_type": "oily" | "dry" | "normal" | "combination",
-        "analysis_data": { ... }  // JSONB, результат модели
-    }
+    204 No Content
 
 
 ### GET /health
@@ -379,4 +361,28 @@ ML-сервис выполняет обработку изображения и 
     200 OK
     {
         "status": "ok"
+    }
+
+### GET /health/db
+Проверка состояния базы данных.
+
+#### Request
+    none
+
+#### Response
+    200 OK
+    {
+        "status": "db ok"
+    }
+
+### GET /health/storage
+Проверка состояния объектного хранилища.
+
+#### Request
+    none
+
+#### Response
+    200 OK
+    {
+        "status": "storage ok"
     }
