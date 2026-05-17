@@ -120,6 +120,7 @@ ML-сервис выполняет обработку изображения и 
     GET    /health
     GET    /health/db
     GET    /health/storage
+    GET    /health/ml
 
 
 ### POST /auth/register
@@ -388,4 +389,17 @@ ML-сервис выполняет обработку изображения и 
     200 OK
     {
         "status": "storage ok"
+    }
+
+
+### GET /health/ml
+Проверка состояния ML-сервиса.
+
+#### Request
+    none
+
+#### Response
+    200 OK
+    {
+        "status": "ml ok"
     }
